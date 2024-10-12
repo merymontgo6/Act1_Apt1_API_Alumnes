@@ -1,4 +1,5 @@
-import mysql.connector
+# Coneccio a la base de dades 
+import mysql.connector 
 
 def db_client():
     
