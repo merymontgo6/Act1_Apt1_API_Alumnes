@@ -1,4 +1,4 @@
-from fastapi import FastAPI,HTTPException
+from fastapi import FastAPI, HTTPException
 import db_alumnat
 import alumnes
 from typing import List
@@ -11,38 +11,53 @@ class alumne(BaseModel):
     nomAlumne: str
     cicle: str
     curs: str
-    grup: str   
-    createdAt: int
-    updatedAt: int
+    grup: str
 
-# retorna llista d'alumnes
 @app.get("/")
 def read_root():
     return {"Alumnes API"} 
 
-@app.get("/alumnes", response_model=List[dict])
+# Retorna una llista json amb tota la informació d’alumnes
+@app.get("/alumnes/list", response_model=List[dict])
 def read_alumnes():
     return alumnes.alumnes_schema(db_alumnat.read())
 
-@app.get("/alumnes/{id}", response_model=alumne)
-def read_alumnes_id(id:int):
-    if db_alumnat.read_id(id) is not None:
-        alumne = alumnes.alumne_schema(db_alumnat.read_id(id))
-    else:
+# Retorna un objecte json amb la informació d’un alumne en concret
+@app.get("/alumnes/show/{id}", response_model=dict)
+def show_alumne(id: int):
+    alumne = db_alumnat.read_id(id)
+    if alumne is None:
         raise HTTPException(status_code=404, detail="Alumne no trobat")
-    return alumne
+    return alumnes.alumne_schema(alumne)
 
-@app.post("/create_alumne")
-async def create_alumne(data: alumne):
-    nomAlumne = data.nomAlumne
-    cicle = data.cicle
-    curs = data.curs
-    grup = data.grup
-    l_alumne_id = db_alumnat.create(nomAlumne, cicle, curs, grup)
+# Permet afegir un nou alumne a la base de dades
+@app.post("/alumne/add")
+async def add_alumne(data: alumne):
+    # comprova q si existeix l'aula
+    if not db_alumnat.check_aula_existeix(data.IdAula):
+        raise HTTPException(status_code=400, detail="IdAula no existent")
+
+    # si l'aula existeix llavors afegeix l'alumne
+    l_alumne_id = db_alumnat.create(data.nomAlumne, data.IdAula, data.cicle, data.curs, data.grup)
+
     return {
-        "msg": "we got data succesfully",
-        "id film": l_alumne_id,
-        "NomAlumne": nomAlumne
+        "msg": "S’ha afegit correctament",
+        "idAlumne": l_alumne_id,
+        "NomAlumne": data.nomAlumne
+    }
+
+# modificar el camp d’un alumne
+@app.put("/alumne/update/{id}")
+async def update_alumne(id: int, data: alumne):
+
+    if not db_alumnat.check_aula_existeix(data.IdAula):
+        raise HTTPException(status_code=400, detail="IdAula no existent")
+    update_records = db_alumnat.update_alumnat(data.nomAlumne, data.IdAula, data.cicle, data.curs, data.grup)
+    
+    if update_records == 0:
+        raise HTTPException(status_code=404, detail="Alumne no trobat")
+    return {
+        "msg": "S’ha actualitzat correctament"
     }
 
 @app.put("/update_alumne/{id}")
@@ -50,16 +65,3 @@ def update_alumne(nomAlumne: str, cicle: str, curs: str, grup: str):
     updated_records = db_alumnat.update_alumnat(nomAlumne, cicle, curs, grup)
     if updated_records == 0:
         raise HTTPException(status_code=404, detail="Alumne no trobat")
-
-@app.post("/create_alumne")
-async def create_alumne(data: alumne):
-    nomAlumne = data.nomAlumne
-    cicle = data.cicle
-    curs = data.curs
-    grup = data.grup
-    l_alumne_id = db_alumnat.create(nomAlumne, cicle, curs, grup)
-    return {
-        "msg": "we got data succesfully",
-        "id film": l_alumne_id,
-        "NomAlumne": nomAlumne
-    }

@@ -20,7 +20,7 @@ def read_id(id):
     try:
         conn = db_client()
         cur = conn.cursor()
-        query = "SELECT * FROM alumnat WHERE id= %s"
+        query = "SELECT * FROM alumnat WHERE IdAlumne= %s"
         value = (id,)
         cur.execute(query, value)
 
@@ -91,3 +91,41 @@ def create(NomAlumne, Cicle, Curs, Grup):
         conn.close()
     
     return alumne_id
+
+def read_id(id):
+    try:
+        conn = db_client()
+        cur = conn.cursor()
+        query = "SELECT * FROM alumnat WHERE IdAlumne = %s"  # Ensure this matches your column name
+        value = (id,)
+        cur.execute(query, value)
+
+        alumne = cur.fetchone()
+        
+        if alumne is None:
+            return None 
+
+    except Exception as e:
+        return {"status": -1, "message": f"Error de lectura: {e}"}
+    
+    finally:
+        conn.close()
+
+    return alumne
+
+def check_aula_exists(id_aula):
+    try:
+        conn = db_client()
+        cur = conn.cursor()
+        query = "SELECT COUNT(*) FROM aula WHERE IdAula = %s"  # Adjust column name accordingly
+        value = (id_aula,)
+        cur.execute(query, value)
+
+        count = cur.fetchone()[0]
+        return count > 0  # Returns True if exists, otherwise False
+
+    except Exception as e:
+        return False  # Return False in case of an error
+
+    finally:
+        conn.close()
