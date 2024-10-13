@@ -80,3 +80,14 @@ async def delete_alumne(id: int):
         "msg": "S’ha esborrat correctament"
     }
 
+# Retorna una llista json amb tota la informació d’alumne
+@app.get("/alumne/listAll", response_model=List[dict])
+async def list_all_alumnes():
+    
+    alumnes = db_alumnat.read_all_alumnes_aula()
+
+    if not alumnes:
+        raise HTTPException(status_code=404, detail="No s'han trobat alumnes")
+
+    return alumnes
+

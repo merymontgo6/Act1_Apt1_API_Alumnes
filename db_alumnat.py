@@ -16,6 +16,7 @@ def read():
 
     return alumnes
 
+# Retorna un alumne segons l'id
 def read_id(id):
     try:
         conn = db_client()
@@ -34,6 +35,7 @@ def read_id(id):
 
     return alumne
 
+# creació d'un nou alumne
 def create(NomAlumne, Cicle, Curs, Grup):
     try:
         conn = db_client()
@@ -54,6 +56,7 @@ def create(NomAlumne, Cicle, Curs, Grup):
     
     return alumne_id
 
+# modificació d'un alumne
 def update_alumnat(NomAlumne, Cicle, Curs, Grup):
     try:
         conn = db_client()
@@ -74,6 +77,7 @@ def update_alumnat(NomAlumne, Cicle, Curs, Grup):
     
     return updated_recs
 
+# verificació de l'existència d'una aula per id
 def check_aula_existeix(id_aula):
     try:
         conn = db_client()
@@ -91,7 +95,8 @@ def check_aula_existeix(id_aula):
     finally:
         conn.close()
 
-def read_all_alumnes_with_aula():
+# Llegir tots els alumnes amb la informació de l'aula per id
+def read_all_alumnes_aula():
     try:
         conn = db_client()
         cur = conn.cursor()
@@ -115,3 +120,4 @@ def read_all_alumnes_with_aula():
         conn.close()
 
     return alumnes
+
