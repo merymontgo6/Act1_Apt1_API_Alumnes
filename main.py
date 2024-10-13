@@ -52,6 +52,7 @@ async def update_alumne(id: int, data: alumne):
 
     if not db_alumnat.check_aula_existeix(data.IdAula):
         raise HTTPException(status_code=400, detail="IdAula no existent")
+    # si no hi troba no es pot modificar l'alumne
     update_records = db_alumnat.update_alumnat(data.nomAlumne, data.IdAula, data.cicle, data.curs, data.grup)
     
     if update_records == 0:
@@ -60,8 +61,22 @@ async def update_alumne(id: int, data: alumne):
         "msg": "S’ha actualitzat correctament"
     }
 
-@app.put("/update_alumne/{id}")
-def update_alumne(nomAlumne: str, cicle: str, curs: str, grup: str):
-    updated_records = db_alumnat.update_alumnat(nomAlumne, cicle, curs, grup)
-    if updated_records == 0:
+# @app.put("/update_alumne/{id}")
+# def update_alumne(nomAlumne: str, cicle: str, curs: str, grup: str):
+#     updated_records = db_alumnat.update_alumnat(nomAlumne, cicle, curs, grup)
+#     if updated_records == 0:
+#         raise HTTPException(status_code=404, detail="Alumne no trobat")
+
+# Permet eliminar un alumne de la BBDD per id
+@app.delete("/alumne/delete/{id}")
+async def delete_alumne(id: int):
+    deleted_records = db_alumnat.delete_alumne(id)
+    
+    if deleted_records == 0:
         raise HTTPException(status_code=404, detail="Alumne no trobat")
+    
+    # Retorna un objecte json amb el missatge “S’ha esborrat correctament”
+    return {
+        "msg": "S’ha esborrat correctament"
+    }
+
