@@ -145,7 +145,7 @@ def check_aula_exists(idAula):
     return result[0]>0
 
 # Llegir tots els alumnes amb la informació de l'aula per id
-def read_all_alumnes_aula():
+def fetch_all_alumnes():
     try:
         conn = db_client()
         cur = conn.cursor()
@@ -153,7 +153,8 @@ def read_all_alumnes_aula():
         # SQL uneix alumnat amb aula
         query = """
         SELECT 
-            a.IdAlumne, a.IdAula, a.nomAlumne, a.cicle, a.curs, a.grup, a.CreatedAt, a.UpdatedAt,
+            a.IdAlumne, a.IdAula, a.NomAlumne, a.Cicle, a.Curs, a.Grup,
+            a.CreatedAt, a.UpdatedAt,
             au.DescAula, au.edifici, au.pis
         FROM alumnat a
         JOIN aula au ON a.IdAula = au.IdAula
@@ -162,10 +163,28 @@ def read_all_alumnes_aula():
         cur.execute(query)
         alumnes = cur.fetchall()
 
+        # Convertim els resultats a un format de diccionari
+        alumnes_list = []
+        for alumne in alumnes:
+            alumnes_list.append({
+                "IdAlumne": alumne[0],
+                "IdAula": alumne[1],
+                "NomAlumne": alumne[2],
+                "Cicle": alumne[3],
+                "Curs": alumne[4],
+                "Grup": alumne[5],
+                "CreatedAt": alumne[6],
+                "UpdatedAt": alumne[7],
+                "DescAula": alumne[8],
+                "Edifici": alumne[9],
+                "Pis": alumne[10],
+            })
+
+
     except Exception as e:
         return {"status": -1, "message": f"Error de lectura: {e}" }
     
     finally:
         conn.close()
 
-    return alumnes
+    return alumnes_list

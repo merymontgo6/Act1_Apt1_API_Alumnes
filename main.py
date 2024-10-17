@@ -14,7 +14,6 @@ class alumne(BaseModel):
     curs: str
     grup: str
     
-
 @app.get("/")
 def read_root():
     return {"Alumnes API"} 
@@ -89,45 +88,12 @@ def delete_alumne(id: int):
         print(f"Error al eliminar alumne: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error al eliminar alumne: {str(e)}")
 
+# Retorna una llista json amb tota la informació d’alumne
+@app.get("/alumne/listAll", response_model=List[dict])
+def read_all_alumnes():
+    alumnes = db_alumnat.fetch_all_alumnes()  # Crida al mètode per recuperar alumnes
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # Retorna una llista json amb tota la informació d’alumne
-# @app.get("/alumne/listAll", response_model=List[dict])
-# async def list_all_alumnes():
+    if not alumnes or (isinstance(alumnes, dict) and 'status' in alumnes):  # Comprova si hi ha un error
+        raise HTTPException(status_code=404, detail="No hi ha alumnes enregistrats")
     
-#     alumnes = db_alumnat.read_all_alumnes_aula()
-
-#     if not alumnes:
-#         raise HTTPException(status_code=404, detail="No s'han trobat alumnes")
-
-#     return alumnes
-
+    return alumnes
