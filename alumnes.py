@@ -11,3 +11,15 @@ def alumne_schema(alumne) -> dict:
     }
 def alumnes_schema(alumnes) -> dict:
     return [alumne_schema(alumne) for alumne in alumnes]
+
+def aula_schema(aula) -> dict:
+    return {
+        "IdAula": aula[0],
+        "DescAula": aula[1],
+        "Edifici": aula[2],
+        "Pis": aula[3],
+        "CretedAt": aula[4],
+        "UpdatedAt": aula[5]
+    }
+def aules_schema(aules) -> dict:
+    return [aula_schema(aula) for aula in aules]

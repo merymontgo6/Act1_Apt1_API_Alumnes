@@ -36,64 +36,101 @@ def read_id(id):
     return alumne
 
 # creació d'un nou alumne
-def create(NomAlumne, Cicle, Curs, Grup):
+def add_alumne(IdAula, NomAlumne, Cicle, Curs, Grup):
     try:
         conn = db_client()
         cur = conn.cursor()
-        query = "INSERT INTO alumnat (nom, cicle, curs, grup) VALUES (%s, %s, %s, %s)"
-        values = (NomAlumne, Cicle, Curs, Grup)
+        
+        # SQL query to insert a new alumne into the database
+        query = "INSERT INTO alumnat (IdAula, NomAlumne, Cicle, Curs, Grup) VALUES (%s, %s, %s, %s, %s);"
+        values = (IdAula, NomAlumne, Cicle, Curs, Grup)
         cur.execute(query, values)
+        
+        # Commit the changes to the database
         conn.commit()
-        alumne_id = cur.lastrowid
-
-        conn.commit()
+        
+        # Get the last inserted ID
+        insert_id = cur.lastrowid
     
     except Exception as e:
-        return {"status": -1, "message": f"Error de creació: {e}" }
+        # Log or handle the error and return an appropriate status
+        return {"status": -1, "message": f"Error de connexió: {e}"}
+    
+    finally:
+        # Ensure the connection is closed
+        conn.close()
+    
+    return insert_id
+
+
+def readAula(idAula):
+    try:
+        conn = db_client()
+        cur = conn.cursor()
+        query = "SELECT * FROM alumnat WHERE IdAlumne= %s"
+        value = (id,)
+        cur.execute(query, value)
+        select_aula = cur.fetchone()
+    
+    except Exception as e:
+        # En cas d'error mostrem un missatge
+        return {"status": -1, "message": f"Error de connexió:{e}" }
     
     finally:
         conn.close()
     
-    return alumne_id
+    return select_aula
 
 # modificació d'un alumne
-def update_alumnat(NomAlumne, Cicle, Curs, Grup):
+def update_alumnat(IdAlumne, NomAlumne, IdAula, Cicle, Curs, Grup):
     try:
         conn = db_client()
         cur = conn.cursor()
-        query = "UPDATE alumnat SET nom=%s, cicle=%s, curs=%s, grup=%s WHERE id=%s"
-        values = (NomAlumne, Cicle, Curs, Grup, id)
+        # SQL query per actualitzar l'alumne
+        query = """
+            UPDATE alumnat
+            SET NomAlumne=%s, IdAula=%s, Cicle=%s, Curs=%s, Grup=%s
+            WHERE IdAlumne=%s
+        """
+        values = (NomAlumne, IdAula, Cicle, Curs, Grup, IdAlumne)
         cur.execute(query, values)
-        conn.commit()
-        updated_recs = cur.rowcount
         
+        # Confirma els canvis
         conn.commit()
+        
+        # Retorna el nombre de registres actualitzats
+        updated_recs = cur.rowcount
     
     except Exception as e:
-        return {"status": -1, "message": f"Error de actualització: {e}" }
+        # Afegeix log per veure l'error a la base de dades
+        print(f"Error de base de dades: {e}")
+        return {"status": -1, "message": f"Error d'actualització: {e}"}
     
     finally:
         conn.close()
     
     return updated_recs
 
+
 # verificació de l'existència d'una aula per id
-def check_aula_existeix(id_aula):
+def check_aula_exists(idAula):
     try:
         conn = db_client()
         cur = conn.cursor()
-        query = "SELECT COUNT(*) FROM aula WHERE IdAula = %s"
-        value = (id_aula,)
-        cur.execute(query, value)
-
-        count = cur.fetchone()[0]
-        return count > 0
-
+        
+        # Consulta SQL per verificar si existeix l'aula amb l'id passat per paràmetres       
+        query = "select count(*) from aula where idAula = %s"
+        cur.execute(query,(idAula,))
+        
+        result = cur.fetchone()
+        
     except Exception as e:
-        return False 
-
+        return {"status": -1, "message": f"Error de connexió: {e}"}
+    
     finally:
         conn.close()
+    
+    return result[0]>0
 
 # Llegir tots els alumnes amb la informació de l'aula per id
 def read_all_alumnes_aula():
