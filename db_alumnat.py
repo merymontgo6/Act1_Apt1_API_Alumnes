@@ -62,7 +62,6 @@ def add_alumne(IdAula, NomAlumne, Cicle, Curs, Grup):
     
     return insert_id
 
-
 def readAula(idAula):
     try:
         conn = db_client()
@@ -82,28 +81,21 @@ def readAula(idAula):
     return select_aula
 
 # modificació d'un alumne
-def update_alumnat(IdAlumne, NomAlumne, IdAula, Cicle, Curs, Grup):
+def update_alumne(IdAlumne, IdAula, NomAlumne, Cicle, Curs, Grup):
     try:
         conn = db_client()
         cur = conn.cursor()
-        # SQL query per actualitzar l'alumne
         query = """
             UPDATE alumnat
-            SET NomAlumne=%s, IdAula=%s, Cicle=%s, Curs=%s, Grup=%s
-            WHERE IdAlumne=%s
+            SET IdAula = %s, NomAlumne = %s, Cicle = %s, Curs = %s, Grup = %s
+            WHERE IdAlumne = %s
         """
-        values = (NomAlumne, IdAula, Cicle, Curs, Grup, IdAlumne)
+        values = (IdAula, NomAlumne, Cicle, Curs, Grup, IdAlumne)
         cur.execute(query, values)
-        
-        # Confirma els canvis
         conn.commit()
-        
-        # Retorna el nombre de registres actualitzats
         updated_recs = cur.rowcount
     
     except Exception as e:
-        # Afegeix log per veure l'error a la base de dades
-        print(f"Error de base de dades: {e}")
         return {"status": -1, "message": f"Error d'actualització: {e}"}
     
     finally:
@@ -111,6 +103,26 @@ def update_alumnat(IdAlumne, NomAlumne, IdAula, Cicle, Curs, Grup):
     
     return updated_recs
 
+# eliminar un alumne per id alumnat
+def delete_alumne(IdAlumne):
+    try:
+        conn = db_client()
+        cur = conn.cursor()
+        print(f"Intentant eliminar alumne amb IdAlumne: {id}")
+        query = "DELETE FROM alumnat WHERE IdAlumne = %s"
+        values = (IdAlumne,)
+        cur.execute(query, values)
+        conn.commit()
+        deleted_recs = cur.rowcount
+    
+    except Exception as e:
+        print(f"Error de base de dades: {e}")
+        return {"status": -1, "message": f"Error al eliminar alumne: {e}"}
+    
+    finally:
+        conn.close()
+    
+    return deleted_recs
 
 # verificació de l'existència d'una aula per id
 def check_aula_exists(idAula):
@@ -157,4 +169,3 @@ def read_all_alumnes_aula():
         conn.close()
 
     return alumnes
-

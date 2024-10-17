@@ -53,47 +53,72 @@ def create_alumn(alumne: alumne):
     
 # modificar el camp d’un alumne
 @app.put("/alumne/update/{id}")
-async def update_alumne(id: int, data: alumne):
+def update_alumne(id: int, alumne: alumne):
     try:
-        print(data)
-        # Comprova si l'Aula existeix
-        aula = db_alumnat.readAula(data.idAula)
+        print(f"Verificant l'Aula amb idAula: {alumne.idAula}")
+        aula = db_alumnat.readAula(alumne.idAula)
         if aula is None:
             raise HTTPException(status_code=400, detail="IdAula no existent")
         # Actualitza l'alumne si es troba
-        update_records = db_alumnat.update_alumnat(id, data.nomAlumne, data.idAula, data.cicle, data.curs, data.grup)
-        if update_records == 0:
-            raise HTTPException(status_code=404, detail="Alumne no trobat")
+        result = db_alumnat.update_alumne(id, alumne.idAula, alumne.nomAlumne, alumne.cicle, alumne.curs, alumne.grup)
+        if result == 0:
+            raise HTTPException(status_code=404, detail="Alumne amb id {id} no trobat")
         
-        return {"msg": "S'ha actualitzat correctament"}
+        return {"status": "success", "message": "Alumne actualitzat amb èxit", "IdAlumne": id}
     
     except HTTPException as e:
-        # Re-llançar HTTPException si es detecta
         raise e
     
     except Exception as e:
-        # Log d'error més detallat
-        raise HTTPException(status_code=500, detail=f"Error al servidor: {str(e)}")
-
-    
-# @app.put("/update_alumne/{id}")
-# def update_alumne(nomAlumne: str, cicle: str, curs: str, grup: str):
-#     updated_records = db_alumnat.update_alumnat(nomAlumne, cicle, curs, grup)
-#     if updated_records == 0:
-#         raise HTTPException(status_code=404, detail="Alumne no trobat")
+        raise HTTPException(status_code=500, detail=f"Error al actualitzar l'alumne: {e}")
 
 # Permet eliminar un alumne de la BBDD per id
-# @app.delete("/alumne/delete/{id}")
-# async def delete_alumne(id: int):
-#     deleted_records = db_alumnat.delete_alumne(id)
+@app.delete("/alumne/delete/{id}")
+def delete_alumne(id: int):
+    try:
+        alumne = db_alumnat.read_id(id)
+        if alumne is None:
+            raise HTTPException(status_code=404, detail="Alumne amb id {id} no trobat")
+        print(alumne)
+        result = db_alumnat.delete_alumne(id)
+        return {"status": "success", "message": f"Alumne amb id {id} eliminat amb èxit"}
+    except HTTPException as e:
+        raise e
     
-#     if deleted_records == 0:
-#         raise HTTPException(status_code=404, detail="Alumne no trobat")
-    
-#     # Retorna un objecte json amb el missatge “S’ha esborrat correctament”
-#     return {
-#         "msg": "S’ha esborrat correctament"
-#     }
+    except Exception as e:
+        print(f"Error al eliminar alumne: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error al eliminar alumne: {str(e)}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # # Retorna una llista json amb tota la informació d’alumne
 # @app.get("/alumne/listAll", response_model=List[dict])
